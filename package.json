@@ -1,15 +1,20 @@
 {
-  "name": "leaderboard-fe",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "nyt-leaderboard-fe",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start -p $PORT"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1",
-    "firebase-admin": "^8.9.2"
+    "firebase": "^7.9.1",
+    "next": "9.2.2",
+    "react": "0.0.0-experimental-5de5b6150",
+    "react-dom": "0.0.0-experimental-5de5b6150",
+    "reactfire": "^2.0.0-rc.1"
+  },
+  "devDependencies": {
+    "babel-plugin-module-resolver": "^4.0.0"
   }
 }
