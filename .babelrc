@@ -1,8 +1,7 @@
 {
   "presets": ["next/babel"],
   "plugins": [
-    ["module-resolver", {
-      "root": ["./src"],
-    }]
+    ["module-resolver", {"root": ["./src"]}],
+    ["styled-components", {"displayName": true, "ssr": true}]
   ]
 }

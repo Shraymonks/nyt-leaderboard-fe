@@ -1,6 +1,6 @@
 {
   "name": "nyt-leaderboard-fe",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -12,9 +12,11 @@
     "next": "9.2.2",
     "react": "0.0.0-experimental-5de5b6150",
     "react-dom": "0.0.0-experimental-5de5b6150",
-    "reactfire": "^2.0.0-rc.1"
+    "reactfire": "^2.0.0-rc.1",
+    "styled-components": "^5.0.1"
   },
   "devDependencies": {
-    "babel-plugin-module-resolver": "^4.0.0"
+    "babel-plugin-module-resolver": "^4.0.0",
+    "babel-plugin-styled-components": "^1.10.7"
   }
 }

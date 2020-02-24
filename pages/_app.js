@@ -1,5 +1,7 @@
 import {FirebaseAppProvider} from 'reactfire';
 
+import 'styles.css';
+
 const firebaseConfig = {
   apiKey: 'AIzaSyDItcXNOObI0-jcbLbPYwbnAH96Jx2dqJ0',
   authDomain: 'nyt-crossword-leaderboard.firebaseapp.com',
