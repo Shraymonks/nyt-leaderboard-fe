@@ -1,13 +1,37 @@
+import Link from 'next/link';
 import styled from 'styled-components';
+import {useRouter} from 'next/router';
 
 import Heading from 'Heading';
-import Layout from 'Layout';
+import Layout, {Container, MessageContainer} from 'Layout';
 import RankedList from 'RankedList';
-import {secondsToMinutes} from 'utils';
+import {getLatestPuzzleDate, getOffsetDate, secondsToMinutes} from 'utils';
 import {useLeaderboard, usePuzzleResults} from 'data';
 
+const PeriodFilter = styled.a`
+  background: ${({active}) => active ? '#000': '#fff'};
+  border: 1px solid ${({active}) => active ? '#000' : '#ccc'};
+  border-radius: 50px;
+  color: ${({active}) => active ? '#fff' : '#000'};
+  display: inline-block;
+  font-weight: ${({active}) => active ? '700' : '500'};
+  margin: 10px 10px 0;
+  padding: 8px 16px;
+  text-decoration: none;
+
+  &:hover {
+    background: ${({active}) => active ? '#000': '#f4f4f4'};
+  }
+`;
+
+const Filters = styled.div`
+  margin: -10px 0 0;
+  padding-top: 30px;
+  text-align: center;
+`;
+
 const StatContainer = styled.div`
-  margin: 0 30px 60px;
+  margin: 30px;
 
   @media (min-width: 800px) {
     min-width: 300px;
@@ -23,8 +47,8 @@ function Stat({list, title}) {
   );
 }
 
-function AverageRanks() {
-  const puzzleResults = usePuzzleResults();
+function AverageRanks({period}) {
+  const puzzleResults = usePuzzleResults(period);
 
   const gamesPlayed = new Map();
   const summedRanks = new Map();
@@ -63,8 +87,8 @@ function AverageRanks() {
   return <Stat list={list} title="Average Rank" />
 }
 
-function AverageTimes() {
-  const leaderboard = useLeaderboard();
+function AverageTimes({period}) {
+  const leaderboard = useLeaderboard(period);
 
   const list = leaderboard.map(({name, results}) => ({
     name,
@@ -81,8 +105,8 @@ function AverageTimes() {
   return <Stat list={list} title="Average Solve Time" />;
 }
 
-function FastestTimes() {
-  const leaderboard = useLeaderboard();
+function FastestTimes({period}) {
+  const leaderboard = useLeaderboard(period);
 
   const list = leaderboard.map(({name, results}) => ({
     name,
@@ -99,8 +123,8 @@ function FastestTimes() {
   return <Stat list={list} title="Fastest Solve Time" />;
 }
 
-function MedianRanks() {
-  const puzzleResults = usePuzzleResults();
+function MedianRanks({period}) {
+  const puzzleResults = usePuzzleResults(period);
 
   const ranks = new Map();
 
@@ -125,13 +149,18 @@ function MedianRanks() {
     result: playerRanks.sort(
       (a, b) => a - b
     )[Math.floor(playerRanks.length / 2)],
-  })).sort((a, b) => a.result - b.result);
+  })).sort((a, b) => {
+    if (a.result === b.result) {
+      return a.name.localeCompare(b.name);
+    }
+    return a.result - b.result;
+  });
 
   return <Stat list={list} title="Median Rank" />
 }
 
-function MedianTimes() {
-  const leaderboard = useLeaderboard();
+function MedianTimes({period}) {
+  const leaderboard = useLeaderboard(period);
 
   const list = leaderboard.map(({name, results}) => ({
     name,
@@ -147,8 +176,8 @@ function MedianTimes() {
   return <Stat list={list} title="Median Solve Time" />;
 }
 
-function NumberSolved() {
-  const leaderboard = useLeaderboard();
+function NumberSolved({period}) {
+  const leaderboard = useLeaderboard(period);
 
   const list = leaderboard.map(({name, results}) => ({
     name,
@@ -158,9 +187,9 @@ function NumberSolved() {
   return <Stat list={list} title="Puzzles Solved" />;
 }
 
-function PuzzlesWon() {
+function PuzzlesWon({period}) {
   const leaderboard = useLeaderboard();
-  const puzzleResults = usePuzzleResults();
+  const puzzleResults = usePuzzleResults(period);
 
   const puzzlesWon = new Map();
 
@@ -188,8 +217,8 @@ function PuzzlesWon() {
   return <Stat list={list} title="Puzzles Won" />
 }
 
-function SlowestTimes() {
-  const leaderboard = useLeaderboard();
+function SlowestTimes({period}) {
+  const leaderboard = useLeaderboard(period);
 
   const list = leaderboard.map(({name, results}) => ({
     name,
@@ -206,17 +235,51 @@ function SlowestTimes() {
   return <Stat list={list} title="Slowest Solve Time" />;
 }
 
+function StatsSection({periodDays}) {
+  let period;
+  if (periodDays != null) {
+    periodDays = parseInt(periodDays, 10);
+    if (isNaN(periodDays) || periodDays <= 0) {
+      return <MessageContainer>Invalid period</MessageContainer>;
+    }
+
+    const end = getLatestPuzzleDate();
+    period = {
+      start: getOffsetDate(end, 1 - periodDays),
+      end,
+    };
+  }
+  return (
+    <Container>
+      <PuzzlesWon period={period} />
+      <NumberSolved period={period} />
+      <AverageTimes period={period} />
+      <MedianTimes period={period} />
+      <AverageRanks period={period} />
+      <MedianRanks period={period} />
+      <FastestTimes period={period} />
+      <SlowestTimes period={period} />
+    </Container>
+  );
+}
+
 function Home() {
+  const {period} = useRouter().query;
+
   return (
     <Layout title="NYT Crossword Stats">
-      <PuzzlesWon />
-      <NumberSolved />
-      <AverageTimes />
-      <MedianTimes />
-      <AverageRanks />
-      <MedianRanks />
-      <FastestTimes />
-      <SlowestTimes />
+      <Filters>
+        <Link href="/?period=7" passHref>
+          <PeriodFilter active={period === '7'}>Last 7 days</PeriodFilter>
+        </Link>
+        <Link href="/?period=30" passHref>
+          <PeriodFilter active={period === '30'}>Last 30 days</PeriodFilter>
+        </Link>
+        <Link href="/" passHref>
+          <PeriodFilter active={period == null}>All time</PeriodFilter>
+        </Link>
+      </Filters>
+      <StatsSection periodDays={period} />
     </Layout>
   );
 }

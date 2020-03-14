@@ -3,28 +3,46 @@ import {
   useFirestoreCollectionData,
 } from 'reactfire';
 
-export function useLeaderboard() {
+export function useLeaderboard(period) {
   const ref = useFirestore()
     .collection('leaderboard')
     .orderBy('name');
 
-  return useFirestoreCollectionData(ref);
+  const leaderboard = useFirestoreCollectionData(ref);
+
+  if (!period) {
+    return leaderboard;
+  }
+  return leaderboard.map(({name, results}) => ({
+    name,
+    results: results.filter(({date}) => {
+      const d = new Date(date);
+
+      return d >= new Date(period.start) && d <= new Date(period.end);
+    })
+  }));
 }
 
-export function usePlayerResults(name) {
+export function usePlayerResults(name, period) {
   const ref = useFirestore()
     .collection('leaderboard')
     .where("name", "==", name)
 
-  return useFirestoreCollectionData(ref)[0]?.results;
+  const results = useFirestoreCollectionData(ref)[0]?.results;
+
+  if (!period) {
+    return results;
+  }
+
+  return results.filter(({date}) => {
+    const d = new Date(date);
+
+    return d >= new Date(period.start) && d <= new Date(period.end);
+  });
 }
 
-export function usePuzzleLeaderboard(date) {
-  const ref = useFirestore()
-    .collection('leaderboard')
-    .orderBy('name');
-
-  return useFirestoreCollectionData(ref).map(({name, results}) => ({
+export function usePuzzleLeaderboard(date, period) {
+  return useLeaderboard(period).map(({name, results}) => ({
     name,
     time: results.find(result => result.date === date)?.time,
   })).sort((a, b) => {
@@ -35,16 +53,10 @@ export function usePuzzleLeaderboard(date) {
   });
 }
 
-export function usePuzzleResults() {
-  const ref = useFirestore()
-    .collection('leaderboard')
-    .orderBy('name');
-
-  const leaderboard = useFirestoreCollectionData(ref);
-
+export function usePuzzleResults(period) {
   const times = new Map();
 
-  for (const {name, results} of leaderboard) {
+  for (const {name, results} of useLeaderboard(period)) {
     for (const {date, time} of results) {
       if (times.has(date)) {
         times.get(date).push({name, time});

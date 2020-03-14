@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import styled from 'styled-components';
+import {useRouter} from 'next/router';
 
 import Heading from 'Heading';
-import Layout, {FixedContainer} from 'Layout';
+import Layout, {FixedContainer, MessageContainer} from 'Layout';
 import RankedList from 'RankedList';
 import {getOffsetDate, secondsToMinutes, toReadableDate} from 'utils';
 import {usePuzzleLeaderboard} from 'data';
@@ -54,8 +55,12 @@ function PrevButton({date}) {
 }
 
 function PuzzleLeaderboard({date}) {
+  if (date == null) {
+    return null;
+  }
+
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return 'Invalid date';
+    return <MessageContainer>Invalid date</MessageContainer>;
   }
 
   const leaderboard = usePuzzleLeaderboard(date);
@@ -65,29 +70,25 @@ function PuzzleLeaderboard({date}) {
   }));
 
   return (
-    <>
+    <FixedContainer>
       <Header>
         <PrevButton date={date} />
         <Heading heading="Your Leaderboard" subHeading={toReadableDate(date)} />
         <NextButton date={date} />
       </Header>
       <RankedList list={formattedLeaderboard} />
-    </>
+    </FixedContainer>
   );
 }
 
-function LeaderboardPage({date}) {
+function LeaderboardPage() {
+  const {date} = useRouter().query;
+
   return (
     <Layout title={`${date} Leaderboard`}>
-      <FixedContainer>
-        <PuzzleLeaderboard date={date} />
-      </FixedContainer>
+      <PuzzleLeaderboard date={date} />
     </Layout>
   );
 }
-
-LeaderboardPage.getInitialProps = ctx => ({
-  date: ctx.query.date,
-});
 
 export default LeaderboardPage;

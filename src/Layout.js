@@ -11,13 +11,18 @@ const Container = styled.div`
   flex-wrap: wrap;
   justify-content: space-around;
   margin: auto;
-  padding: 30px;
 
   @media (max-width: 799px) {
     flex-direction: column;
-    margin-top: 68px;
     max-width: 600px;
   }
+`;
+
+const FixedContainer = styled.div`
+  flex: 1;
+  margin: auto;
+  max-width: 600px;
+  padding: 30px;
 `;
 
 const Header = styled.header`
@@ -47,6 +52,11 @@ const Logo = styled.img`
   @media (max-width: 799px) {
     height: 21px;
   }
+`;
+
+const MessageContainer = styled.div`
+  padding: 30px;
+  text-align: center;
 `;
 
 const StyledLink = styled.a`
@@ -113,18 +123,16 @@ function Layout({children, title}) {
           </NavLink>
         </nav>
       </Header>
-      <Container>
-        <Suspense fallback="loading...">
-          {children}
-        </Suspense>
-      </Container>
+      <Suspense fallback={<MessageContainer>loading...</MessageContainer>}>
+        {children}
+      </Suspense>
     </>
   );
 }
 
-export const FixedContainer = styled.div`
-  flex: 1;
-  max-width: 600px;
-`;
-
-export default Layout;
+export {
+  Container,
+  FixedContainer,
+  Layout as default,
+  MessageContainer,
+}
