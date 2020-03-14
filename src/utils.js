@@ -1,21 +1,30 @@
 export function getLatestPuzzleDate() {
   const date = new Date();
-  const day = date.getDay();
-  const isWeekend = day === 0 || day === 6;
+  const day = date.getUTCDay();
+  const hours = date.getUTCHours();
+  const isWeekend =
+    day === 6 && hours === 23 ||
+    day === 0 ||
+    day === 1 && hours < 23;
 
-  const latestDate = new Date(Date.UTC(
+  const weekdayUTCHourOffset = -3; // Releases 3am UTC
+  const weekendUTCHourOffset = 1; // Releases 11pm UTC
+
+  const hourOffset = isWeekend ? weekendUTCHourOffset : weekdayUTCHourOffset;
+
+  const latestDate = new Date(
     date.getFullYear(),
     date.getMonth(),
     date.getDate(),
-    date.getHours() + (isWeekend ? 9 : 5),
-  ));
+    date.getHours() + hourOffset
+  );
 
   return latestDate.toISOString().substring(0, 10);
 }
 
 export function getOffsetDate(dateString, offset) {
   const date = new Date(dateString);
-  date.setDate(date.getDate() + offset);
+  date.setUTCDate(date.getUTCDate() + offset);
 
   return date.toISOString().substring(0, 10);
 }
