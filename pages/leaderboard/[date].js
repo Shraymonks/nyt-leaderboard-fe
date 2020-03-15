@@ -85,7 +85,7 @@ function LeaderboardPage() {
   const {date} = useRouter().query;
 
   return (
-    <Layout title={`${date} Leaderboard`}>
+    <Layout title={`${date ?? ''} Leaderboard`}>
       <PuzzleLeaderboard date={date} />
     </Layout>
   );
