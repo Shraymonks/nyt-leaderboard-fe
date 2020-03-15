@@ -269,13 +269,13 @@ function Home() {
   return (
     <Layout title="NYT Crossword Stats">
       <Filters>
-        <Link href="/?period=7" passHref>
+        <Link href="/?period=7" passHref scroll={false}>
           <PeriodFilter active={period === '7'}>Last 7 days</PeriodFilter>
         </Link>
-        <Link href="/?period=30" passHref>
+        <Link href="/?period=30" passHref scroll={false}>
           <PeriodFilter active={period === '30'}>Last 30 days</PeriodFilter>
         </Link>
-        <Link href="/" passHref>
+        <Link href="/" passHref scroll={false}>
           <PeriodFilter active={period == null}>All time</PeriodFilter>
         </Link>
       </Filters>
