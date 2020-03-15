@@ -1,6 +1,6 @@
 {
   "name": "nyt-leaderboard-fe",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,6 +8,8 @@
     "start": "next start -p $PORT"
   },
   "dependencies": {
+    "date-fns": "^2.11.0",
+    "date-fns-tz": "^1.0.10",
     "firebase": "^7.11.0",
     "next": "^9.3.0",
     "react": "0.0.0-experimental-8b155d261",

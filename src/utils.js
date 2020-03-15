@@ -1,32 +1,31 @@
+import {format, toDate, utcToZonedTime} from 'date-fns-tz';
+
+function formatDate(date) {
+  return format(date, 'yyyy-MM-dd');
+}
+
 export function getLatestPuzzleDate() {
-  const date = new Date();
-  const day = date.getUTCDay();
-  const hours = date.getUTCHours();
+  const date = utcToZonedTime(new Date(), 'America/Los_Angeles');
+  const day = date.getDay();
+  const hours = date.getHours();
   const isWeekend =
-    day === 6 && hours === 23 ||
+    day === 6 && hours >= 15 ||
     day === 0 ||
-    day === 1 && hours < 23;
+    day === 1 && hours < 15;
 
-  const weekdayUTCHourOffset = -3; // Releases 3am UTC
-  const weekendUTCHourOffset = 1; // Releases 11pm UTC
+  const weekdayHourOffset = 5; // Releases 7pm PT
+  const weekendHourOffset = 9; // Releases 3pm PT
+  const hourOffset = isWeekend ? weekendHourOffset : weekdayHourOffset;
+  date.setHours(date.getHours() + hourOffset);
 
-  const hourOffset = isWeekend ? weekendUTCHourOffset : weekdayUTCHourOffset;
-
-  const latestDate = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    date.getHours() + hourOffset
-  );
-
-  return latestDate.toISOString().substring(0, 10);
+  return formatDate(date);
 }
 
 export function getOffsetDate(dateString, offset) {
-  const date = new Date(dateString);
-  date.setUTCDate(date.getUTCDate() + offset);
+  const date = toDate(dateString);
+  date.setDate(date.getDate() + offset);
 
-  return date.toISOString().substring(0, 10);
+  return formatDate(date);
 }
 
 export function secondsToMinutes(seconds) {
@@ -35,12 +34,6 @@ export function secondsToMinutes(seconds) {
   return `${mm}:${ss}`;
 }
 
-export function toReadableDate(date) {
-  return new Date(date).toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'long',
-    timeZone: 'UTC',
-    weekday: 'long',
-    year: 'numeric',
-  });
+export function toReadableDate(dateString) {
+  return format(toDate(dateString), 'EEEE, MMMM d, yyyy');
 }
