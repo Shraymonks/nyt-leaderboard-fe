@@ -25,9 +25,20 @@ const UnrankedItem = styled(ListItem)`
   color: #c4c4c4;
 `;
 
-function RankedList({list}) {
+type Result = number | string | null;
+
+export interface RankedListItem {
+  name: string;
+  result: Result;
+}
+
+interface RankedListProps {
+  list: RankedListItem[];
+}
+
+function RankedList({list}: RankedListProps) {
   let lastRank = 0;
-  let lastResult;
+  let lastResult: Result = null;
 
   const listItems = list.map(({name, result}) => {
     if (result == null) {

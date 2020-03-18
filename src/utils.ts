@@ -1,10 +1,10 @@
 import {format, toDate, utcToZonedTime} from 'date-fns-tz';
 
-function formatDate(date) {
+function formatDate(date: Date): string {
   return format(date, 'yyyy-MM-dd');
 }
 
-export function getLatestPuzzleDate() {
+export function getLatestPuzzleDate(): string {
   const date = utcToZonedTime(new Date(), 'America/Los_Angeles');
   const day = date.getDay();
   const hours = date.getHours();
@@ -21,19 +21,19 @@ export function getLatestPuzzleDate() {
   return formatDate(date);
 }
 
-export function getOffsetDate(dateString, offset) {
+export function getOffsetDate(dateString: string, offset: number): string {
   const date = toDate(dateString);
   date.setDate(date.getDate() + offset);
 
   return formatDate(date);
 }
 
-export function secondsToMinutes(seconds) {
+export function secondsToMinutes(seconds: number): string {
   const mm = Math.floor(seconds / 60);
   const ss = Math.floor(seconds % 60).toString().padStart(2, '0');
   return `${mm}:${ss}`;
 }
 
-export function toReadableDate(dateString) {
+export function toReadableDate(dateString: string): string {
   return format(toDate(dateString), 'EEEE, MMMM d, yyyy');
 }

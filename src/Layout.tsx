@@ -59,9 +59,13 @@ const MessageContainer = styled.div`
   text-align: center;
 `;
 
-const StyledLink = styled.a`
+interface StyledLinkProps {
+  isActive: boolean;
+}
+
+const StyledLink = styled.a<StyledLinkProps>`
   border-bottom: 3px solid;
-  border-bottom-color: ${({active}) => active ? '#787886' : 'transparent'};
+  border-bottom-color: ${({isActive}) => isActive ? '#787886' : 'transparent'};
   color: #787886;
   display: inline-block;
   font-size: 12px;
@@ -85,26 +89,37 @@ const StyledLink = styled.a`
   }
 `;
 
-function NavLink(props) {
+interface NavLinkProps {
+  as?: string;
+  children: React.ReactNode;
+  href: string;
+}
+
+function NavLink(props: NavLinkProps) {
   const {pathname} = useRouter();
 
   return (
     <Link href={props.href} as={props.as} passHref>
-      <StyledLink active={pathname === props.href}>
+      <StyledLink isActive={pathname === props.href}>
         {props.children}
       </StyledLink>
     </Link>
   );
 }
 
-function Layout({children, title}) {
+interface LayoutProps {
+  children: React.ReactNode;
+  title: string;
+}
+
+function Layout({children, title}: LayoutProps) {
   return (
     <>
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      
+
       <Header>
         <Link href="/">
           <a>

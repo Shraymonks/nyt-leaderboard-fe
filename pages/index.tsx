@@ -4,23 +4,27 @@ import {useRouter} from 'next/router';
 
 import Heading from 'Heading';
 import Layout, {Container, MessageContainer} from 'Layout';
-import RankedList from 'RankedList';
+import RankedList, {RankedListItem} from 'RankedList';
 import {getLatestPuzzleDate, getOffsetDate, secondsToMinutes} from 'utils';
-import {useLeaderboard, usePuzzleResults} from 'data';
+import {Period, useLeaderboard, usePuzzleResults} from 'data';
 
-const PeriodFilter = styled.a`
-  background: ${({active}) => active ? '#000': '#fff'};
-  border: 1px solid ${({active}) => active ? '#000' : '#ccc'};
+interface PeriodFilterProps {
+  isActive: boolean;
+}
+
+const PeriodFilter = styled.a<PeriodFilterProps>`
+  background: ${({isActive}) => isActive ? '#000': '#fff'};
+  border: 1px solid ${({isActive}) => isActive ? '#000' : '#ccc'};
   border-radius: 50px;
-  color: ${({active}) => active ? '#fff' : '#000'};
+  color: ${({isActive}) => isActive ? '#fff' : '#000'};
   display: inline-block;
-  font-weight: ${({active}) => active ? '700' : '500'};
+  font-weight: ${({isActive}) => isActive ? '700' : '500'};
   margin: 10px 10px 0;
   padding: 8px 16px;
   text-decoration: none;
 
   &:hover {
-    background: ${({active}) => active ? '#000': '#f4f4f4'};
+    background: ${({isActive}) => isActive ? '#000': '#f4f4f4'};
   }
 `;
 
@@ -38,7 +42,12 @@ const StatContainer = styled.div`
   }
 `;
 
-function Stat({list, title}) {
+interface StatContainerProps {
+  list: RankedListItem[];
+  title: string;
+}
+
+function Stat({list, title}: StatContainerProps) {
   return (
     <StatContainer>
       <Heading heading={title} />
@@ -47,7 +56,11 @@ function Stat({list, title}) {
   );
 }
 
-function AverageRanks({period}) {
+interface StatProps {
+  period: Period;
+}
+
+function AverageRanks({period}: StatProps) {
   const puzzleResults = usePuzzleResults(period);
 
   const gamesPlayed = new Map();
@@ -87,7 +100,7 @@ function AverageRanks({period}) {
   return <Stat list={list} title="Average Rank" />
 }
 
-function AverageTimes({period}) {
+function AverageTimes({period}: StatProps) {
   const leaderboard = useLeaderboard(period);
 
   const list = leaderboard.map(({name, results}) => ({
@@ -105,7 +118,7 @@ function AverageTimes({period}) {
   return <Stat list={list} title="Average Solve Time" />;
 }
 
-function FastestTimes({period}) {
+function FastestTimes({period}: StatProps) {
   const leaderboard = useLeaderboard(period);
 
   const list = leaderboard.map(({name, results}) => ({
@@ -123,10 +136,10 @@ function FastestTimes({period}) {
   return <Stat list={list} title="Fastest Solve Time" />;
 }
 
-function MedianRanks({period}) {
+function MedianRanks({period}: StatProps) {
   const puzzleResults = usePuzzleResults(period);
 
-  const ranks = new Map();
+  const ranks: Map<string, number[]> = new Map();
 
   for (const {results} of puzzleResults) {
     let lastRank = 0;
@@ -136,8 +149,9 @@ function MedianRanks({period}) {
       const rank = time === lastTime ? lastRank : ++lastRank;
       lastTime = time;
 
-      if (ranks.has(name)) {
-        ranks.get(name).push(rank);
+      const playerRanks = ranks.get(name);
+      if (playerRanks) {
+        playerRanks.push(rank);
       } else {
         ranks.set(name, [rank]);
       }
@@ -159,7 +173,7 @@ function MedianRanks({period}) {
   return <Stat list={list} title="Median Rank" />
 }
 
-function MedianTimes({period}) {
+function MedianTimes({period}: StatProps) {
   const leaderboard = useLeaderboard(period);
 
   const list = leaderboard.map(({name, results}) => ({
@@ -176,7 +190,7 @@ function MedianTimes({period}) {
   return <Stat list={list} title="Median Solve Time" />;
 }
 
-function NumberSolved({period}) {
+function NumberSolved({period}: StatProps) {
   const leaderboard = useLeaderboard(period);
 
   const list = leaderboard.map(({name, results}) => ({
@@ -187,7 +201,7 @@ function NumberSolved({period}) {
   return <Stat list={list} title="Puzzles Solved" />;
 }
 
-function PuzzlesWon({period}) {
+function PuzzlesWon({period}: StatProps) {
   const leaderboard = useLeaderboard();
   const puzzleResults = usePuzzleResults(period);
 
@@ -217,7 +231,7 @@ function PuzzlesWon({period}) {
   return <Stat list={list} title="Puzzles Won" />
 }
 
-function SlowestTimes({period}) {
+function SlowestTimes({period}: StatProps) {
   const leaderboard = useLeaderboard(period);
 
   const list = leaderboard.map(({name, results}) => ({
@@ -235,17 +249,21 @@ function SlowestTimes({period}) {
   return <Stat list={list} title="Slowest Solve Time" />;
 }
 
-function StatsSection({periodDays}) {
-  let period;
+interface StatsProps {
+  periodDays: string;
+}
+
+function StatsSection({periodDays}: StatsProps) {
+  let period: Period;
   if (periodDays != null) {
-    periodDays = parseInt(periodDays, 10);
-    if (isNaN(periodDays) || periodDays <= 0) {
+    const days = parseInt(periodDays, 10);
+    if (!/^\d+$/.test(periodDays) || isNaN(days) || days <= 0) {
       return <MessageContainer>Invalid period</MessageContainer>;
     }
 
     const end = getLatestPuzzleDate();
     period = {
-      start: getOffsetDate(end, 1 - periodDays),
+      start: getOffsetDate(end, 1 - days),
       end,
     };
   }
@@ -265,21 +283,22 @@ function StatsSection({periodDays}) {
 
 function Home() {
   const {period} = useRouter().query;
+  const periodString = Array.isArray(period) ? period[0]: period;
 
   return (
     <Layout title="NYT Crossword Stats">
       <Filters>
         <Link href="/?period=7" passHref scroll={false}>
-          <PeriodFilter active={period === '7'}>Last 7 days</PeriodFilter>
+          <PeriodFilter isActive={periodString === '7'}>Last 7 days</PeriodFilter>
         </Link>
         <Link href="/?period=30" passHref scroll={false}>
-          <PeriodFilter active={period === '30'}>Last 30 days</PeriodFilter>
+          <PeriodFilter isActive={periodString === '30'}>Last 30 days</PeriodFilter>
         </Link>
         <Link href="/" passHref scroll={false}>
-          <PeriodFilter active={period == null}>All time</PeriodFilter>
+          <PeriodFilter isActive={periodString == null}>All time</PeriodFilter>
         </Link>
       </Filters>
-      <StatsSection periodDays={period} />
+      <StatsSection periodDays={periodString} />
     </Layout>
   );
 }

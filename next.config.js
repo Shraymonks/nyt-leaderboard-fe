@@ -3,4 +3,7 @@ module.exports = {
     reactMode: 'concurrent',
     reactStrictMode: true,
   },
+  typescript: {
+    ignoreDevErrors: true,
+  },
 };

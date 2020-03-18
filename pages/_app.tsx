@@ -1,3 +1,4 @@
+import {AppProps} from 'next/app';
 import {FirebaseAppProvider} from 'reactfire';
 import {createGlobalStyle} from 'styled-components';
 
@@ -44,7 +45,7 @@ const firebaseConfig = {
   appId: '1:304703383218:web:8e2a1353b699d6d6bf0bab'
 };
 
-function MyApp({Component, pageProps}) {
+function MyApp({Component, pageProps}: AppProps) {
   return (
     <FirebaseAppProvider firebaseConfig={firebaseConfig}>
       <GlobalStyle />

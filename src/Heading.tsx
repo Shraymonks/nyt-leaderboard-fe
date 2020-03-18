@@ -1,3 +1,4 @@
+import React from 'react';
 import styled from 'styled-components';
 
 const GameHeading = styled.h2`
@@ -22,7 +23,12 @@ const SubHeading = styled.h3`
   margin: 0;
 `;
 
-function Heading({heading, subHeading}) {
+interface HeadingProps {
+  heading: string;
+  subHeading?: string;
+}
+
+function Heading({heading, subHeading}: HeadingProps) {
   return (
     <HeadingGroup>
       <GameHeading>The Mini Crossword</GameHeading>
@@ -32,4 +38,4 @@ function Heading({heading, subHeading}) {
   );
 }
 
-export default Heading;
+export default React.memo(Heading);

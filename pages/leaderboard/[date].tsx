@@ -38,7 +38,11 @@ const StyledPrevButton = styled(StyledNextButton)`
   transform: scaleX(-1);
 `;
 
-function NextButton({date}) {
+interface DateButtonProps {
+  date: string;
+}
+
+function NextButton({date}: DateButtonProps) {
   return (
     <Link href="/leaderboard/[date]" as={`/leaderboard/${getOffsetDate(date, 1)}`} passHref>
       <StyledNextButton>Next Leaderboard</StyledNextButton>
@@ -46,7 +50,7 @@ function NextButton({date}) {
   );
 }
 
-function PrevButton({date}) {
+function PrevButton({date}: DateButtonProps) {
   return (
     <Link href="/leaderboard/[date]" as={`/leaderboard/${getOffsetDate(date, -1)}`} passHref>
       <StyledPrevButton>Previous Leaderboard</StyledPrevButton>
@@ -54,7 +58,11 @@ function PrevButton({date}) {
   );
 }
 
-function PuzzleLeaderboard({date}) {
+interface PuzzleLeaderboardProps {
+  date: string | undefined;
+}
+
+function PuzzleLeaderboard({date}: PuzzleLeaderboardProps) {
   if (date == null) {
     return null;
   }
@@ -83,10 +91,11 @@ function PuzzleLeaderboard({date}) {
 
 function LeaderboardPage() {
   const {date} = useRouter().query;
+  const dateString = Array.isArray(date) ? date[0]: date;
 
   return (
-    <Layout title={`${date ?? ''} Leaderboard`}>
-      <PuzzleLeaderboard date={date} />
+    <Layout title={`${dateString ?? ''} Leaderboard`}>
+      <PuzzleLeaderboard date={dateString} />
     </Layout>
   );
 }
