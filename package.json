@@ -11,7 +11,7 @@
     "date-fns": "^2.11.0",
     "date-fns-tz": "^1.0.10",
     "firebase": "^7.11.0",
-    "next": "^9.3.1",
+    "next": "^9.3.2",
     "react": "0.0.0-experimental-8b155d261",
     "react-dom": "0.0.0-experimental-8b155d261",
     "reactfire": "^2.0.2",
