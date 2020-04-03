@@ -61,10 +61,16 @@ interface StatProps {
 }
 
 function AverageRanks({period}: StatProps) {
+  const leaderboard = useLeaderboard(period);
   const puzzleResults = usePuzzleResults(period);
 
   const gamesPlayed = new Map();
   const summedRanks = new Map();
+
+  for (const {name} of leaderboard) {
+    gamesPlayed.set(name, 0);
+    summedRanks.set(name, 0);
+  }
 
   for (const {results} of puzzleResults) {
     let lastRank = 0;
@@ -74,17 +80,8 @@ function AverageRanks({period}: StatProps) {
       const rank = time === lastTime ? lastRank : ++lastRank;
       lastTime = time;
 
-      if (summedRanks.has(name)) {
-        summedRanks.set(name, summedRanks.get(name) + rank);
-      } else {
-        summedRanks.set(name, rank);
-      }
-
-      if (gamesPlayed.has(name)) {
-        gamesPlayed.set(name, gamesPlayed.get(name) + 1);
-      } else {
-        gamesPlayed.set(name, 1);
-      }
+      summedRanks.set(name, summedRanks.get(name) + rank);
+      gamesPlayed.set(name, gamesPlayed.get(name) + 1);
     }
   }
 
@@ -94,7 +91,7 @@ function AverageRanks({period}: StatProps) {
   })).sort((a, b) => a.result - b.result)
     .map(({name, result}) => ({
       name,
-      result: result.toFixed(2),
+      result: isNaN(result) ? null : result.toFixed(2),
     }));
 
   return <Stat list={list} title="Average Rank" />
@@ -112,7 +109,7 @@ function AverageTimes({period}: StatProps) {
   })).sort((a, b) => a.result - b.result)
     .map(({name, result}) => ({
       name,
-      result: secondsToMinutes(result),
+      result: isNaN(result) ? null : secondsToMinutes(result),
     }));
 
   return <Stat list={list} title="Average Solve Time" />;
@@ -137,9 +134,14 @@ function FastestTimes({period}: StatProps) {
 }
 
 function MedianRanks({period}: StatProps) {
+  const leaderboard = useLeaderboard(period);
   const puzzleResults = usePuzzleResults(period);
 
   const ranks: Map<string, number[]> = new Map();
+
+  for (const {name} of leaderboard) {
+    ranks.set(name, []);
+  }
 
   for (const {results} of puzzleResults) {
     let lastRank = 0;
@@ -152,8 +154,6 @@ function MedianRanks({period}: StatProps) {
       const playerRanks = ranks.get(name);
       if (playerRanks) {
         playerRanks.push(rank);
-      } else {
-        ranks.set(name, [rank]);
       }
     }
   }
@@ -184,7 +184,7 @@ function MedianTimes({period}: StatProps) {
   })).sort((a, b) => a.result - b.result)
     .map(({name, result}) => ({
       name,
-      result: secondsToMinutes(result),
+      result: isNaN(result) ? null : secondsToMinutes(result),
     }));
 
   return <Stat list={list} title="Median Solve Time" />;
