@@ -67,6 +67,9 @@ export function usePuzzleLeaderboard(date: string, period?: Period): PuzzleLeade
     name,
     time: results.find(result => result.date === date)?.time ?? null,
   })).sort((a, b) => {
+    if (a.time === b.time) {
+      return a.name < b.name ? -1 : 1;
+    }
     if (a.time != null && b.time != null) {
       return a.time - b.time;
     }
@@ -101,6 +104,11 @@ export function usePuzzleResults(period?: Period): PuzzleResult[] {
 
   return Array.from(times).map(([date, results]) => ({
     date,
-    results: results.sort((a, b) => a.time - b.time),
+    results: results.sort((a, b) => {
+      if (a.time === b.time) {
+        return a.name < b.name ? -1 : 1;
+      }
+      return a.time - b.time;
+    }),
   })).sort((a, b) => +new Date(b.date) - +new Date(a.date));
 }

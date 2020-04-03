@@ -56,6 +56,34 @@ function Stat({list, title}: StatContainerProps) {
   );
 }
 
+interface Result {
+  name: string;
+  result: number;
+}
+
+type CompareFunction = (a: number, b: number) => number;
+
+function compareResults(a: Result, b: Result, compareFunction: CompareFunction): number {
+  if (a.result === b.result || isNaN(a.result) && isNaN(b.result)) {
+    return a.name < b.name ? -1 : 1;
+  }
+
+  const comparison = compareFunction(a.result, b.result);
+  if (isFinite(comparison)) {
+    return comparison;
+  }
+
+  return isFinite(a.result) ? -1 : 1;
+}
+
+function compareResultsAscending(a: Result, b: Result): number {
+  return compareResults(a, b, (x, y) => x - y);
+}
+
+function compareResultsDescending(a: Result, b: Result): number {
+  return compareResults(a, b, (x, y) => y - x);
+}
+
 interface StatProps {
   period: Period;
 }
@@ -88,7 +116,7 @@ function AverageRanks({period}: StatProps) {
   const list = Array.from(summedRanks).map(([name, summedRank]) => ({
     name,
     result: summedRank / gamesPlayed.get(name),
-  })).sort((a, b) => a.result - b.result)
+  })).sort(compareResultsAscending)
     .map(({name, result}) => ({
       name,
       result: isNaN(result) ? null : result.toFixed(2),
@@ -106,7 +134,7 @@ function AverageTimes({period}: StatProps) {
       (sum, {time}) => sum + time,
       0,
     ) / results.length,
-  })).sort((a, b) => a.result - b.result)
+  })).sort(compareResultsAscending)
     .map(({name, result}) => ({
       name,
       result: isNaN(result) ? null : secondsToMinutes(result),
@@ -124,7 +152,7 @@ function FastestTimes({period}: StatProps) {
       (fastest, {time}) => Math.min(time, fastest),
       Infinity,
     ),
-  })).sort((a, b) => a.result - b.result)
+  })).sort(compareResultsAscending)
     .map(({name, result}) => ({
       name,
       result: isFinite(result) ? secondsToMinutes(result) : null,
@@ -163,12 +191,7 @@ function MedianRanks({period}: StatProps) {
     result: playerRanks.sort(
       (a, b) => a - b
     )[Math.floor(playerRanks.length / 2)],
-  })).sort((a, b) => {
-    if (a.result === b.result) {
-      return a.name.localeCompare(b.name);
-    }
-    return a.result - b.result;
-  });
+  })).sort(compareResultsAscending);
 
   return <Stat list={list} title="Median Rank" />
 }
@@ -181,7 +204,7 @@ function MedianTimes({period}: StatProps) {
     result: results.sort((a, b) => (
       b.time - a.time
     ))[Math.floor(results.length / 2)]?.time,
-  })).sort((a, b) => a.result - b.result)
+  })).sort(compareResultsAscending)
     .map(({name, result}) => ({
       name,
       result: isNaN(result) ? null : secondsToMinutes(result),
@@ -196,7 +219,7 @@ function NumberSolved({period}: StatProps) {
   const list = leaderboard.map(({name, results}) => ({
     name,
     result: results.length,
-  })).sort((a, b) => b.result - a.result);
+  })).sort(compareResultsDescending);
 
   return <Stat list={list} title="Puzzles Solved" />;
 }
@@ -226,7 +249,7 @@ function PuzzlesWon({period}: StatProps) {
   const list = leaderboard.map(({name}) => ({
     name,
     result: puzzlesWon.get(name) ?? 0,
-  })).sort((a, b) => b.result - a.result);
+  })).sort(compareResultsDescending);
 
   return <Stat list={list} title="Puzzles Won" />
 }
@@ -240,7 +263,7 @@ function SlowestTimes({period}: StatProps) {
       (slowest, {time}) => Math.max(time, slowest),
       0,
     ),
-  })).sort((a, b) => b.result - a.result)
+  })).sort(compareResultsDescending)
     .map(({name, result}) => ({
       name,
       result: result > 0 ? secondsToMinutes(result) : null,
