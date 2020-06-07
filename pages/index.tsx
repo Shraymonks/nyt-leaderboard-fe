@@ -273,7 +273,7 @@ function SlowestTimes({period}: StatProps) {
 }
 
 interface StatsProps {
-  periodDays: string;
+  periodDays: string | undefined;
 }
 
 function StatsSection({periodDays}: StatsProps) {

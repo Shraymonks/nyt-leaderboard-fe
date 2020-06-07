@@ -8,20 +8,20 @@
     "start": "next start -p $PORT"
   },
   "dependencies": {
-    "date-fns": "^2.11.1",
+    "date-fns": "^2.14.0",
     "date-fns-tz": "^1.0.10",
-    "firebase": "^7.13.2",
-    "next": "^9.3.4",
-    "react": "0.0.0-experimental-8b155d261",
-    "react-dom": "0.0.0-experimental-8b155d261",
+    "firebase": "^7.15.0",
+    "next": "^9.4.4",
+    "react": "0.0.0-experimental-33c3af284",
+    "react-dom": "0.0.0-experimental-33c3af284",
     "reactfire": "^2.0.3",
-    "styled-components": "^5.0.1"
+    "styled-components": "^5.1.1"
   },
   "devDependencies": {
-    "@types/react": "^16.9.32",
+    "@types/react": "^16.9.35",
     "@types/styled-components": "^5.0.1",
     "babel-plugin-module-resolver": "^4.0.0",
     "babel-plugin-styled-components": "^1.10.7",
-    "typescript": "^3.8.3"
+    "typescript": "^3.9.5"
   }
 }
