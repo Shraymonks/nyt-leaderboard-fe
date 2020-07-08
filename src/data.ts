@@ -20,17 +20,18 @@ export function useLeaderboard(period?: Period): PlayerResults[] {
 
   const leaderboard: PlayerResults[] = useFirestoreCollectionData(ref);
 
-  if (!period) {
-    return leaderboard;
-  }
-  return leaderboard.map(({name, results}) => ({
-    name,
-    results: results.filter(({date}) => {
+  return leaderboard.map(({name, results}) => {
+    const filtered = period ? results.filter(({date}) => {
       const d = new Date(date);
 
       return d >= new Date(period.start) && d <= new Date(period.end);
-    })
-  }));
+    }) : results;
+
+    return {
+      name,
+      results: filtered.sort((a, b) => +new Date(b.date) - +new Date(a.date))
+    };
+  });
 }
 
 interface PlayerResult {

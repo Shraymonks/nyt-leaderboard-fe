@@ -9,7 +9,7 @@ import {getLatestPuzzleDate} from 'utils';
 const Container = styled.div`
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
+  justify-content: space-evenly;
   margin: auto;
 
   @media (max-width: 799px) {

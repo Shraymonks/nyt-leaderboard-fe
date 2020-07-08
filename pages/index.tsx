@@ -143,6 +143,34 @@ function AverageTimes({period}: StatProps) {
   return <Stat list={list} title="Average Solve Time" />;
 }
 
+function CurrentStreak({period}: StatProps) {
+  const leaderboard = useLeaderboard(period);
+
+  const end = period?.end ?? getLatestPuzzleDate();
+
+  const list = leaderboard.map(({name, results}) => {
+    let result = 0;
+    let lastDate = getOffsetDate(end, -1);
+
+    for (let i = 0; i < results.length; i++) {
+      const {date} = results[i];
+      if (date === end || date === lastDate) {
+        result++;
+        lastDate = getOffsetDate(date, -1);
+      } else {
+        break;
+      }
+    }
+
+    return {
+      name,
+      result,
+    };
+  }).sort(compareResultsDescending);
+
+  return <Stat list={list} title="Current Streak" />;
+}
+
 function FastestTimes({period}: StatProps) {
   const leaderboard = useLeaderboard(period);
 
@@ -194,6 +222,38 @@ function MedianRanks({period}: StatProps) {
   })).sort(compareResultsAscending);
 
   return <Stat list={list} title="Median Rank" />
+}
+
+function LongestStreak({period}: StatProps) {
+  const leaderboard = useLeaderboard(period);
+
+  const end = period?.end ?? getLatestPuzzleDate();
+
+  const list = leaderboard.map(({name, results}) => {
+    let result = 0;
+    let longest = 0;
+    let lastDate = getOffsetDate(end, -1);
+
+    for (let i = 0; i < results.length; i++) {
+      const {date} = results[i];
+      if (date === end || date === lastDate) {
+        result++;
+      } else {
+        if (result > longest) {
+          longest = result;
+        }
+        result = 1;
+      }
+      lastDate = getOffsetDate(date, -1);
+    }
+
+    return {
+      name,
+      result: Math.max(result, longest),
+    };
+  }).sort(compareResultsDescending);
+
+  return <Stat list={list} title="Longest Streak" />;
 }
 
 function MedianTimes({period}: StatProps) {
@@ -292,6 +352,8 @@ function StatsSection({periodDays}: StatsProps) {
   }
   return (
     <Container>
+      <CurrentStreak period={period} />
+      <LongestStreak period={period} />
       <PuzzlesWon period={period} />
       <NumberSolved period={period} />
       <AverageTimes period={period} />
