@@ -3,12 +3,20 @@ import {
   useFirestoreCollectionData,
 } from 'reactfire';
 
+interface ObjWithDate {
+  date: string;
+}
+
+function compareDateDescending(a: ObjWithDate, b: ObjWithDate): number {
+  return a.date < b.date ? 1 : -1;
+}
+
 export type Period = {
   end: string;
   start: string;
 } | undefined
 
-interface PlayerResults {
+export interface PlayerResults {
   name: string;
   results: PlayerResult[];
 }
@@ -21,15 +29,13 @@ export function useLeaderboard(period?: Period): PlayerResults[] {
   const leaderboard: PlayerResults[] = useFirestoreCollectionData(ref);
 
   return leaderboard.map(({name, results}) => {
-    const filtered = period ? results.filter(({date}) => {
-      const d = new Date(date);
-
-      return d >= new Date(period.start) && d <= new Date(period.end);
-    }) : results;
+    const filtered = period ? results.filter(({date}) => (
+      date >= period.start && date <= period.end
+    )) : results;
 
     return {
       name,
-      results: filtered.sort((a, b) => +new Date(b.date) - +new Date(a.date))
+      results: filtered.sort(compareDateDescending)
     };
   });
 }
@@ -51,11 +57,7 @@ export function usePlayerResults(name: string, period?: Period): PlayerResult[] 
     return results;
   }
 
-  return results.filter(({date}) => {
-    const d = new Date(date);
-
-    return d >= new Date(period.start) && d <= new Date(period.end);
-  });
+  return results.filter(({date}) => date >= period.start && date <= period.end);
 }
 
 interface PuzzleLeaderboardTime {
@@ -83,7 +85,7 @@ interface PlayerTime {
   time: number;
 }
 
-interface PuzzleResult {
+export interface PuzzleResult {
   date: string;
   results: PuzzleLeaderboardTime[];
 }
@@ -111,5 +113,5 @@ export function usePuzzleResults(period?: Period): PuzzleResult[] {
       }
       return a.time - b.time;
     }),
-  })).sort((a, b) => +new Date(b.date) - +new Date(a.date));
+  })).sort(compareDateDescending);
 }

@@ -1,0 +1,35 @@
+@font-face {
+  font-display: swap;
+  font-family: 'nyt-franklin';
+  font-style: normal;
+  font-weight: 500;
+  src: url('/franklin-normal-500.woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'nyt-franklin';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/franklin-normal-700.woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'nyt-karnakcondensed';
+  font-style: normal;
+  font-weight: 700;
+  src: url("/karnakcondensed-normal-700.woff2");
+}
+
+body {
+  font-family: 'nyt-franklin', sans-serif;
+  margin: 0;
+  min-width: 320px;
+}
+
+@media (max-width: 799px) {
+  body {
+    margin-top: 68px;
+  }
+}

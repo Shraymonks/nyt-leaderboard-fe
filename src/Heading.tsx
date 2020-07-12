@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 const GameHeading = styled.h2`
-  font: 700 16px 'NYT-Franklin';
+  font: 700 16px 'NYT-Franklin', sans-serif;
   letter-spacing: 0.5px;
   margin: 0 0 8px;
   text-transform: uppercase;
@@ -14,12 +14,12 @@ const HeadingGroup = styled.hgroup`
 `;
 
 const StyledHeading = styled.h1`
-  font: 35px/38px 'NYT-KarnakCondensed';
+  font: 35px/38px 'NYT-KarnakCondensed', serif;
   margin: 0 0 3px;
 `;
 
 const SubHeading = styled.h3`
-  font: 16px 'NYT-Franklin';
+  font: 16px 'NYT-Franklin', sans-serif;
   margin: 0;
 `;
 

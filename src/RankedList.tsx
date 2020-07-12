@@ -17,7 +17,7 @@ const Name = styled.span`
 `;
 
 const Rank = styled.span`
-  font-family: 'NYT-KarnakCondensed';
+  font-family: 'NYT-KarnakCondensed', serif;
   width: 30px;
 `;
 

@@ -116,8 +116,10 @@ function Layout({children, title}: LayoutProps) {
   return (
     <>
       <Head>
+        <meta name="description" content="Leaderboard for the NYT mini" />
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
+        <link rel="preconnect" href="https://firestore.googleapis.com" />
       </Head>
 
       <Header>

@@ -6,31 +6,40 @@ import Heading from 'Heading';
 import Layout, {Container, MessageContainer} from 'Layout';
 import RankedList, {RankedListItem} from 'RankedList';
 import {getLatestPuzzleDate, getOffsetDate, secondsToMinutes} from 'utils';
-import {Period, useLeaderboard, usePuzzleResults} from 'data';
+import {Period, PlayerResults, PuzzleResult, useLeaderboard, usePuzzleResults} from 'data';
 
-interface PeriodFilterProps {
+interface PillProps {
   isActive: boolean;
 }
 
-const PeriodFilter = styled.a<PeriodFilterProps>`
+const Pill = styled.a<PillProps>`
   background: ${({isActive}) => isActive ? '#000': '#fff'};
   border: 1px solid ${({isActive}) => isActive ? '#000' : '#ccc'};
   border-radius: 50px;
   color: ${({isActive}) => isActive ? '#fff' : '#000'};
   display: inline-block;
   font-weight: ${({isActive}) => isActive ? '700' : '500'};
-  margin: 10px 10px 0;
+  margin: 12px 6px 0;
   padding: 8px 16px;
+  text-align: center;
   text-decoration: none;
 
   &:hover {
     background: ${({isActive}) => isActive ? '#000': '#f4f4f4'};
   }
+
+  /* Fix pixel shift from bold styling */
+  &::before {
+    content: attr(title);
+    display: block;
+    font-weight: 700;
+    height: 0;
+    visibility: hidden;
+  }
 `;
 
 const Filters = styled.div`
-  margin: -10px 0 0;
-  padding-top: 30px;
+  padding-top: 18px;
   text-align: center;
 `;
 
@@ -41,6 +50,20 @@ const StatContainer = styled.div`
     min-width: 300px;
   }
 `;
+
+interface PeriodFilterProps {
+  href: string;
+  isActive: boolean;
+  title: string;
+}
+
+function PeriodFilter({href, isActive, title}: PeriodFilterProps) {
+  return (
+    <Link href={href} passHref scroll={false}>
+      <Pill isActive={isActive} title={title}>{title}</Pill>
+    </Link>
+  );
+}
 
 interface StatContainerProps {
   list: RankedListItem[];
@@ -85,13 +108,15 @@ function compareResultsDescending(a: Result, b: Result): number {
 }
 
 interface StatProps {
-  period: Period;
+  leaderboard: PlayerResults[];
 }
 
-function AverageRanks({period}: StatProps) {
-  const leaderboard = useLeaderboard(period);
-  const puzzleResults = usePuzzleResults(period);
+interface PuzzleResultsStatProps {
+  leaderboard: PlayerResults[];
+  puzzleResults: PuzzleResult[];
+}
 
+function AverageRanks({leaderboard, puzzleResults}: PuzzleResultsStatProps) {
   const gamesPlayed = new Map();
   const summedRanks = new Map();
 
@@ -125,9 +150,7 @@ function AverageRanks({period}: StatProps) {
   return <Stat list={list} title="Average Rank" />
 }
 
-function AverageTimes({period}: StatProps) {
-  const leaderboard = useLeaderboard(period);
-
+function AverageTimes({leaderboard}: StatProps) {
   const list = leaderboard.map(({name, results}) => ({
     name,
     result: results.reduce(
@@ -143,18 +166,16 @@ function AverageTimes({period}: StatProps) {
   return <Stat list={list} title="Average Solve Time" />;
 }
 
-function CurrentStreak({period}: StatProps) {
-  const leaderboard = useLeaderboard(period);
-
-  const end = period?.end ?? getLatestPuzzleDate();
+function CurrentStreak({leaderboard}: StatProps) {
+  const latestPuzzleDate = getLatestPuzzleDate();
 
   const list = leaderboard.map(({name, results}) => {
     let result = 0;
-    let lastDate = getOffsetDate(end, -1);
+    let lastDate = getOffsetDate(latestPuzzleDate, -1);
 
     for (let i = 0; i < results.length; i++) {
       const {date} = results[i];
-      if (date === end || date === lastDate) {
+      if (date === lastDate || date === latestPuzzleDate) {
         result++;
         lastDate = getOffsetDate(date, -1);
       } else {
@@ -171,9 +192,7 @@ function CurrentStreak({period}: StatProps) {
   return <Stat list={list} title="Current Streak" />;
 }
 
-function FastestTimes({period}: StatProps) {
-  const leaderboard = useLeaderboard(period);
-
+function FastestTimes({leaderboard}: StatProps) {
   const list = leaderboard.map(({name, results}) => ({
     name,
     result: results.reduce(
@@ -189,10 +208,7 @@ function FastestTimes({period}: StatProps) {
   return <Stat list={list} title="Fastest Solve Time" />;
 }
 
-function MedianRanks({period}: StatProps) {
-  const leaderboard = useLeaderboard(period);
-  const puzzleResults = usePuzzleResults(period);
-
+function MedianRanks({leaderboard, puzzleResults}: PuzzleResultsStatProps) {
   const ranks: Map<string, number[]> = new Map();
 
   for (const {name} of leaderboard) {
@@ -224,41 +240,41 @@ function MedianRanks({period}: StatProps) {
   return <Stat list={list} title="Median Rank" />
 }
 
-function LongestStreak({period}: StatProps) {
-  const leaderboard = useLeaderboard(period);
-
-  const end = period?.end ?? getLatestPuzzleDate();
+function LongestStreak({leaderboard}: StatProps) {
+  const latestPuzzleDate = getLatestPuzzleDate();
 
   const list = leaderboard.map(({name, results}) => {
-    let result = 0;
+    let streak = 0;
     let longest = 0;
-    let lastDate = getOffsetDate(end, -1);
+    let lastDate = getOffsetDate(latestPuzzleDate, -1);
 
     for (let i = 0; i < results.length; i++) {
       const {date} = results[i];
-      if (date === end || date === lastDate) {
-        result++;
+      if (date === lastDate || date === latestPuzzleDate) {
+        streak++;
       } else {
-        if (result > longest) {
-          longest = result;
+        if (streak > longest) {
+          longest = streak;
         }
-        result = 1;
+        streak = 1;
+
+        if (longest > results.length - i) {
+          break;
+        }
       }
       lastDate = getOffsetDate(date, -1);
     }
 
     return {
       name,
-      result: Math.max(result, longest),
+      result: Math.max(streak, longest),
     };
   }).sort(compareResultsDescending);
 
   return <Stat list={list} title="Longest Streak" />;
 }
 
-function MedianTimes({period}: StatProps) {
-  const leaderboard = useLeaderboard(period);
-
+function MedianTimes({leaderboard}: StatProps) {
   const list = leaderboard.map(({name, results}) => ({
     name,
     result: results.sort((a, b) => (
@@ -273,9 +289,7 @@ function MedianTimes({period}: StatProps) {
   return <Stat list={list} title="Median Solve Time" />;
 }
 
-function NumberSolved({period}: StatProps) {
-  const leaderboard = useLeaderboard(period);
-
+function NumberSolved({leaderboard}: StatProps) {
   const list = leaderboard.map(({name, results}) => ({
     name,
     result: results.length,
@@ -284,10 +298,7 @@ function NumberSolved({period}: StatProps) {
   return <Stat list={list} title="Puzzles Solved" />;
 }
 
-function PuzzlesWon({period}: StatProps) {
-  const leaderboard = useLeaderboard();
-  const puzzleResults = usePuzzleResults(period);
-
+function PuzzlesWon({leaderboard, puzzleResults}: PuzzleResultsStatProps) {
   const puzzlesWon = new Map();
 
   for (const {results} of puzzleResults) {
@@ -314,9 +325,7 @@ function PuzzlesWon({period}: StatProps) {
   return <Stat list={list} title="Puzzles Won" />
 }
 
-function SlowestTimes({period}: StatProps) {
-  const leaderboard = useLeaderboard(period);
-
+function SlowestTimes({leaderboard}: StatProps) {
   const list = leaderboard.map(({name, results}) => ({
     name,
     result: results.reduce(
@@ -350,18 +359,22 @@ function StatsSection({periodDays}: StatsProps) {
       end,
     };
   }
+
+  const leaderboard = useLeaderboard(period);
+  const puzzleResults = usePuzzleResults(period);
+
   return (
     <Container>
-      <CurrentStreak period={period} />
-      <LongestStreak period={period} />
-      <PuzzlesWon period={period} />
-      <NumberSolved period={period} />
-      <AverageTimes period={period} />
-      <MedianTimes period={period} />
-      <AverageRanks period={period} />
-      <MedianRanks period={period} />
-      <FastestTimes period={period} />
-      <SlowestTimes period={period} />
+      <CurrentStreak leaderboard={leaderboard} />
+      <LongestStreak leaderboard={leaderboard} />
+      <PuzzlesWon leaderboard={leaderboard} puzzleResults={puzzleResults} />
+      <NumberSolved leaderboard={leaderboard} />
+      <AverageTimes leaderboard={leaderboard} />
+      <MedianTimes leaderboard={leaderboard} />
+      <AverageRanks leaderboard={leaderboard} puzzleResults={puzzleResults}/>
+      <MedianRanks leaderboard={leaderboard} puzzleResults={puzzleResults}/>
+      <FastestTimes leaderboard={leaderboard} />
+      <SlowestTimes leaderboard={leaderboard} />
     </Container>
   );
 }
@@ -373,15 +386,9 @@ function Home() {
   return (
     <Layout title="NYT Crossword Stats">
       <Filters>
-        <Link href="/?period=7" passHref scroll={false}>
-          <PeriodFilter isActive={periodString === '7'}>Last 7 days</PeriodFilter>
-        </Link>
-        <Link href="/?period=30" passHref scroll={false}>
-          <PeriodFilter isActive={periodString === '30'}>Last 30 days</PeriodFilter>
-        </Link>
-        <Link href="/" passHref scroll={false}>
-          <PeriodFilter isActive={periodString == null}>All time</PeriodFilter>
-        </Link>
+        <PeriodFilter href="/?period=7" isActive={periodString === '7'} title="Last 7 days" />
+        <PeriodFilter href="/?period=30" isActive={periodString === '30'} title="Last 30 days" />
+        <PeriodFilter href="/" isActive={periodString == null} title="All time" />
       </Filters>
       <StatsSection periodDays={periodString} />
     </Layout>
